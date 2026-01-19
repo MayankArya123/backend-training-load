@@ -3,9 +3,11 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const workoutRoutes = require("./routes/workout.routes.js");
 const authRoutes = require("./routes/auth.routes.js");
+const userRoutes = require("./routes/user.routes.js")
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const authMiddleware = require("./middleware/auth.js");
+
 
 dotenv.config();
 const app = express();
@@ -20,6 +22,9 @@ app.use(
 
 app.use(express.json());
 
+// 🔐 Protected route
+
+app.use('/api/users',authMiddleware,userRoutes)
 app.use("/api/auth", authRoutes);
 app.use("/api/workouts", authMiddleware, workoutRoutes);
 

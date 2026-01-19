@@ -6,15 +6,12 @@ const JWT_SECRET = process.env.JWT_SECRET || "secret123";
 const authMiddleware = async (req, res, next) => {
   let token;
 
-  // 1️⃣ Read token from Authorization header (PRIMARY)
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer ")
-  ) {
-    token = req.headers.authorization.split(" ")[1];
+  // ✅ 1. Read token from HTTP-only cookie (PRIMARY)
+  if (req.cookies && req.cookies.token) {
+    token = req.cookies.token;
   }
 
-  console.log('token check',token)
+  console.log("token check", token);
 
   if (!token) return res.status(401).json({ error: "Unauthorized" });
 
