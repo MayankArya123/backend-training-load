@@ -5,11 +5,12 @@ const JWT_SECRET = process.env.JWT_SECRET || "secret123";
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: false,
-  sameSite: "lax",
+  secure: process.env.NODE_ENV === "production", // true on deployed HTTPS
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   path: "/",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 };
+
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -39,9 +40,6 @@ const login = async (req, res) => {
   if (!valid) return res.status(400).json({ error: "Invalid credentials" });
 
   const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" });
-
-  // ❌ REMOVE express-session
-  // req.session.userId = ...
 
   // ✅ SET JWT COOKIE
   res.cookie("token", token, COOKIE_OPTIONS);
