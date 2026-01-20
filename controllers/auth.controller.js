@@ -5,72 +5,58 @@ const JWT_SECRET = process.env.JWT_SECRET || "secret123";
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production" ? true : false,
-  sameSite:process.env.NODE_ENV === "production" ? "none" : "lax", // cross-domain safe,
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  secure: false,
+  sameSite: "lax",
+  path: "/",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
-// Register
 const register = async (req, res) => {
-  try {
-    console.log("register route hitting");
+  const { name, email, password } = req.body;
 
-    const { name, email, password } = req.body;
-    const exists = await User.findOne({ email });
-    if (exists) return res.status(400).json({ error: "Email already exists" });
+  const exists = await User.findOne({ email });
+  if (exists) return res.status(400).json({ error: "Email already exists" });
 
-    const user = await User.create({ name, email, password });
+  const user = await User.create({ name, email, password });
 
-    const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" });
+  const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" });
 
-    // ⭐ SET COOKIE
-    res.cookie("token", token, COOKIE_OPTIONS);
+  // ✅ SET JWT COOKIE (not userId)
+  res.cookie("token", token, COOKIE_OPTIONS);
 
-    res.json({
-      token,
-      user: { _id: user._id, name: user.name, email: user.email },
-    });
-  } catch (err) {
-    console.log("error", err);
-    res.status(500).json({ error: err.message });
-  }
+  res.json({
+    user: { _id: user._id, name: user.name, email: user.email },
+  });
 };
 
-// Login
 const login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ error: "Invalid credentials" });
+  const { email, password } = req.body;
 
-    const valid = await user.comparePassword(password);
-    if (!valid) return res.status(400).json({ error: "Invalid credentials" });
+  const user = await User.findOne({ email });
+  if (!user) return res.status(400).json({ error: "Invalid credentials" });
 
-    const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" });
+  const valid = await user.comparePassword(password);
+  if (!valid) return res.status(400).json({ error: "Invalid credentials" });
 
-    // ⭐ SET COOKIE
-    res.cookie("token", token, COOKIE_OPTIONS);
-    res.json({
-      token,
-      user: { _id: user._id, name: user.name, email: user.email },
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" });
+
+  // ❌ REMOVE express-session
+  // req.session.userId = ...
+
+  // ✅ SET JWT COOKIE
+  res.cookie("token", token, COOKIE_OPTIONS);
+
+  res.json({
+    user: { _id: user._id, name: user.name, email: user.email },
+  });
 };
 
-const logout = async (req, res) => {
-  try {
-    res.clearCookie("token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-    });
+const logout = (req, res) => {
+  res.clearCookie("token", {
+    path: "/",
+  });
 
-    res.json({ message: "Logged out successfully" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  res.json({ message: "Logged out successfully" });
 };
 
 module.exports = {

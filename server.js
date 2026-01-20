@@ -1,32 +1,39 @@
+require('dotenv').config(); // 🔥 must be first line
+
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const workoutRoutes = require("./routes/workout.routes.js");
 const authRoutes = require("./routes/auth.routes.js");
-const userRoutes = require("./routes/user.routes.js")
+const userRoutes = require("./routes/user.routes.js");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
-const authMiddleware = require("./middleware/auth.js");
+const auth = require("./middleware/auth.js");
 
 
 dotenv.config();
 const app = express();
 
-app.use(cookieParser());
 app.use(
   cors({
-    origin: "https://frontend-training-load.vercel.app", // your Next.js frontend
-    credentials: true,
+    origin:process.env.NEXT_URL, // frontend origin
+    credentials: true, // must allow credentials
   }),
 );
 
+app.use(cookieParser());
 app.use(express.json());
-
-// 🔐 Protected route
-
-app.use('/api/users',authMiddleware,userRoutes)
+app.use("/api/users",userRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/workouts", authMiddleware, workoutRoutes);
+app.use("/api/workouts", auth, workoutRoutes);
+
+
+app.get("/debug", (req, res) => {
+  res.json({
+    cookies: req.cookies,
+    headers: req.headers.cookie || null,
+  });
+});
 
 // Routes
 app.get("/", (req, res) => {

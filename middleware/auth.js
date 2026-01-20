@@ -3,28 +3,19 @@ const User = require("../models/user");
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret123";
 
-const authMiddleware = async (req, res, next) => {
-  let token;
+const auth = (req, res, next) => {
+  console.log("check token", req.cookies.token);
 
-  // ✅ 1. Read token from HTTP-only cookie (PRIMARY)
-  if (req.cookies && req.cookies.token) {
-    token = req.cookies.token;
-  }
-
-  console.log("token check", token);
-
+  const token = req.cookies.token;
   if (!token) return res.status(401).json({ error: "Unauthorized" });
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findById(decoded._id);
-    if (!user) return res.status(401).json({ error: "Unauthorized" });
-
-    req.user = user;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = decoded._id;
     next();
-  } catch (err) {
-    res.status(401).json({ error: "Unauthorized" });
+  } catch {
+    return res.status(401).json({ error: "Invalid token" });
   }
 };
 
-module.exports = authMiddleware;
+module.exports = auth;

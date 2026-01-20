@@ -12,10 +12,11 @@ const workoutSchema = z.object({
 
 // Helper to get logged-in userId
 const getUserId = (req) => {
-  return req.user?._id; // adjust according to your auth
+  return req.userId;
 };
 
 const getWorkouts = async (req, res) => {
+  console.log("req in workout", req.session);
   try {
     const userId = getUserId(req);
     const workouts = await Workout.find({ userId }).sort({ date: -1 });
@@ -28,7 +29,7 @@ const getWorkouts = async (req, res) => {
 const createWorkout = async (req, res) => {
   try {
     const userId = getUserId(req);
-    console.log("create hitting");
+    console.log("create hitting", userId);
     const parsed = workoutSchema.parse(req.body);
     const workout = await Workout.create({
       userId,
@@ -76,9 +77,8 @@ const deleteWorkout = async (req, res) => {
 };
 
 const getWeeklyInsights = async (req, res) => {
-
   const userId = getUserId(req);
-  const workouts = await Workout.find({userId}).sort({ date: -1 });
+  const workouts = await Workout.find({ userId }).sort({ date: -1 });
   const loads = weeklyLoad(workouts);
   const weeks = Object.keys(loads);
   const current = loads[weeks[0]] || 0;
