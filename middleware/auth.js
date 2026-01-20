@@ -4,8 +4,6 @@ const User = require("../models/user");
 const JWT_SECRET = process.env.JWT_SECRET || "secret123";
 
 const auth = (req, res, next) => {
-  console.log("check token", req.cookies.token);
-
   const token = req.cookies.token;
   if (!token) return res.status(401).json({ error: "Unauthorized" });
 

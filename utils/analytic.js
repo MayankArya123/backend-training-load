@@ -1,4 +1,4 @@
-const Workout = require("../models/workout.js")
+const Workout = require("../models/workout.js");
 
 function calculateVolume(workout) {
   return workout.duration * workout.intensity;
@@ -32,10 +32,14 @@ function detectPlateau(workouts) {
 
 function getWeekKey(date) {
   const year = date.getFullYear();
-  const week = Math.ceil(
-    ((+date - +new Date(year, 0, 1)) / 86400000 + 1) / 7
-  );
+  const week = Math.ceil(((+date - +new Date(year, 0, 1)) / 86400000 + 1) / 7);
   return `${year}-W${week}`;
 }
 
-module.exports = {calculateVolume,weeklyLoad,getWeekKey,detectPlateau,fatigueRisk}
+module.exports = {
+  calculateVolume,
+  weeklyLoad,
+  getWeekKey,
+  detectPlateau,
+  fatigueRisk,
+};

@@ -16,7 +16,6 @@ const getUserId = (req) => {
 };
 
 const getWorkouts = async (req, res) => {
-  console.log("req in workout", req.session);
   try {
     const userId = getUserId(req);
     const workouts = await Workout.find({ userId }).sort({ date: -1 });
@@ -29,7 +28,7 @@ const getWorkouts = async (req, res) => {
 const createWorkout = async (req, res) => {
   try {
     const userId = getUserId(req);
-    console.log("create hitting", userId);
+
     const parsed = workoutSchema.parse(req.body);
     const workout = await Workout.create({
       userId,
@@ -38,14 +37,12 @@ const createWorkout = async (req, res) => {
     });
     res.status(201).json(workout);
   } catch (err) {
-    console.log("error in create", err);
     res.status(400).json({ error: err.message });
   }
 };
 
 const updateWorkout = async (req, res) => {
   try {
-    console.log("update wrokout hitting");
     const userId = getUserId(req);
 
     const parsed = workoutSchema.partial().parse(req.body);
@@ -60,7 +57,6 @@ const updateWorkout = async (req, res) => {
     if (!updated) return res.status(404).json({ error: "Not found" });
     res.json(updated);
   } catch (err) {
-    console.log("error in update workout", err);
     res.status(400).json({ error: err.message });
   }
 };

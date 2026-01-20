@@ -1,4 +1,4 @@
-require('dotenv').config(); // 🔥 must be first line
+require("dotenv").config(); // 🔥 must be first line
 
 const express = require("express");
 const cors = require("cors");
@@ -10,23 +10,21 @@ const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const auth = require("./middleware/auth.js");
 
-
 dotenv.config();
 const app = express();
 
 app.use(
   cors({
-    origin:process.env.NEXT_URL, // frontend origin
+    origin: process.env.NEXT_URL, // frontend origin
     credentials: true, // must allow credentials
   }),
 );
 
 app.use(cookieParser());
 app.use(express.json());
-app.use("/api/users",userRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/workouts", auth, workoutRoutes);
-
 
 app.get("/debug", (req, res) => {
   res.json({
